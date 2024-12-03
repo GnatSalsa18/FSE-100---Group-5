@@ -1,30 +1,64 @@
 let targetShape; // to store the properties of the target shape
 let drawnPoints = []; // to store the user's drawn points
+let change = 25;
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(800, 600); // Updated canvas size
   background(200);
   strokeWeight(10);
   colorMode(RGB);
   stroke("black");
 
+  let rectWidth = 200 + change; // Outer rectangle width
+  let rectHeight = 200 + change; // Outer rectangle height
+  let innerWidth = rectWidth - change; // Inner rectangle width
+  let innerHeight = rectHeight - change; // Inner rectangle height
+
+  // Calculate the top-left corner of the outer rectangle
+  let outerX = (width - rectWidth) / 2;
+  let outerY = (height - rectHeight) / 2;
+
+  // Calculate the top-left corner of the inner rectangle
+  let innerX = outerX + (change / 2);
+  let innerY = outerY + (change / 2);
+
   // Draw outer black rectangle
   fill("black");
-  rect(100, 100, 200, 200);
+  rect(outerX, outerY, rectWidth, rectHeight);
 
   // Draw inner white rectangle
   fill("white");
-  rect(110, 110, 180, 180);
+  rect(innerX, innerY, innerWidth, innerHeight);
 
   // Store properties of the outer and inner rectangles
   targetShape = {
-    outer: { x: 100, y: 100, width: 200, height: 200 },
-    inner: { x: 110, y: 110, width: 180, height: 180 }
+    outer: { x: outerX, y: outerY, width: rectWidth, height: rectHeight },
+    inner: { x: innerX, y: innerY, width: innerWidth, height: innerHeight }
   };
 }
 
 function mouseDragged() {
   stroke(0, 255, 0);
+  strokeWeight(10);
+
+  let withinOuterRect = 
+    mouseX >= targetShape.outer.x && 
+    mouseX <= targetShape.outer.x + targetShape.outer.width &&
+    mouseY >= targetShape.outer.y && 
+    mouseY <= targetShape.outer.y + targetShape.outer.height;
+
+  // Check if point is outside the inner white rectangle
+  let outsideInnerRect = 
+    mouseX < targetShape.inner.x || 
+    mouseX > targetShape.inner.x + targetShape.inner.width ||
+    mouseY < targetShape.inner.y || 
+    mouseY > targetShape.inner.y + targetShape.inner.height;
+
+  // If the point is outside the black border area, change the stroke to red
+  if (!(withinOuterRect && outsideInnerRect)) {
+    stroke(255, 0, 0);
+  }
+
   line(pmouseX, pmouseY, mouseX, mouseY);
   drawnPoints.push({ x: mouseX, y: mouseY }); // store drawn points
 }
@@ -63,19 +97,20 @@ function calculateAccuracy() {
 
 function displayFeedback(accuracy) {
   background(200);
+  stroke(0, 255, 0);
 
   // Draw the original black and white rectangles
-  fill("black");
+  fill(0, 255, 0);
   rect(targetShape.outer.x, targetShape.outer.y, targetShape.outer.width, targetShape.outer.height);
   fill("white");
   rect(targetShape.inner.x, targetShape.inner.y, targetShape.inner.width, targetShape.inner.height);
-  
+
   // Optionally, redraw the user's drawn line for visual feedback
   stroke(0, 255, 0);
   for (let i = 1; i < drawnPoints.length; i++) {
     line(drawnPoints[i - 1].x, drawnPoints[i - 1].y, drawnPoints[i].x, drawnPoints[i].y);
   }
-  
+
   // Display the accuracy text on top
   strokeWeight(0);
   fill(0);
