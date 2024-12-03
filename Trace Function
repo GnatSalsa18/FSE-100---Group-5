@@ -1,30 +1,51 @@
 let targetShape; // to store the properties of the target shape
 let drawnPoints = []; // to store the user's drawn points
+let change = 25;
 
 function setup() {
   createCanvas(400, 400);
   background(200);
-  strokeWeight(10);
+  strokeWeight(0);
   colorMode(RGB);
   stroke("black");
 
   // Draw outer black rectangle
   fill("black");
-  rect(100, 100, 200, 200);
-
+  rect(100 - (change / 2), 100 - (change / 2), 200 + change, 200 + change);
   // Draw inner white rectangle
   fill("white");
   rect(110, 110, 180, 180);
+  
 
   // Store properties of the outer and inner rectangles
   targetShape = {
-    outer: { x: 100, y: 100, width: 200, height: 200 },
+    outer: { x: 100 - (change / 2), y: 100 - (change / 2), width: 200 + change, height: 200 + change },
     inner: { x: 110, y: 110, width: 180, height: 180 }
   };
 }
 
 function mouseDragged() {
   stroke(0, 255, 0);
+  strokeWeight(10);
+  
+  let withinOuterRect = 
+      mouseX >= targetShape.outer.x && 
+      mouseX <= targetShape.outer.x + targetShape.outer.width &&
+      mouseY >= targetShape.outer.y && 
+      mouseY <= targetShape.outer.y + targetShape.outer.height;
+
+    // Check if point is outside the inner white rectangle
+    let outsideInnerRect = 
+      mouseX < targetShape.inner.x || 
+      mouseX > targetShape.inner.x + targetShape.inner.width ||
+      mouseY < targetShape.inner.y || 
+      mouseY > targetShape.inner.y + targetShape.inner.height;
+
+    // If the point is within the black border area, count it as correct
+    if ( !(withinOuterRect && outsideInnerRect)) {
+      stroke(255, 0, 0);
+    }
+  
   line(pmouseX, pmouseY, mouseX, mouseY);
   drawnPoints.push({ x: mouseX, y: mouseY }); // store drawn points
 }
@@ -63,9 +84,10 @@ function calculateAccuracy() {
 
 function displayFeedback(accuracy) {
   background(200);
+  stroke(0, 255, 0);
 
   // Draw the original black and white rectangles
-  fill("black");
+  fill(0, 255, 0);
   rect(targetShape.outer.x, targetShape.outer.y, targetShape.outer.width, targetShape.outer.height);
   fill("white");
   rect(targetShape.inner.x, targetShape.inner.y, targetShape.inner.width, targetShape.inner.height);
